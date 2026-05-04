@@ -1,253 +1,352 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>DayZombi - Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ModSteam</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  margin: 0;
+  background: #121212;
+  color: white;
+  font-family: Arial;
+}
 
-    <style>
-        body {
-            background: #0f0f0f;
-            font-family: Arial;
-            color: white;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
+.header {
+  padding: 10px 15px;
+  font-size: 18px;
+}
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-            padding: 20px;
-        }
+/* NOVO - CATEGORIAS */
+.categorias {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px;
+}
 
-        /* CARD LIMPO */
-        .card {
-            background: #181818;
-            padding: 18px;
-            border-radius: 12px;
-            border: 1px solid #222;
-            margin-bottom: 20px;
-        }
+.cat-btn {
+  padding: 8px 14px;
+  background: #1f1f1f;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
 
-        h1, h2, h3 {
-            font-weight: normal;
-            margin: 0 0 10px 0;
-            text-align: center;
-        }
+.cat-btn.active {
+  background: #00c853;
+  color: black;
+}
 
-        h1 { color: #f0f0f0; font-size: 22px; }
-        h2 { color: #dedede; font-size: 18px; }
-        h3 { color: #b8b8b8; font-size: 15px; }
+.search {
+  padding: 10px;
+}
+.search input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 25px;
+  border: none;
+  background: #1f1f1f;
+  color: white;
+}
 
-        /* INPUT PROFISSIONAL */
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            background: #111;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            font-size: 15px;
-        }
+.row {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding: 10px;
+}
 
-        /* BOTÃO CLEAN */
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #2e2e2e;
-            border: 1px solid #444;
-            border-radius: 8px;
-            font-size: 15px;
-            color: white;
-            margin-top: 12px;
-            cursor: pointer;
-        }
+.card {
+  min-width: 140px;
+  background: #1f1f1f;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
 
-        button:active {
-            transform: scale(0.98);
-        }
+.card img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
 
-        .logout {
-            background: #2b2b2b;
-            border-color: #555;
-        }
+.card .info {
+  padding: 8px;
+}
 
-        /* CHAT PROFISSIONAL */
-        #chatSection {
-            display: none;
-        }
+.card .title {
+  font-size: 13px;
+}
 
-        .chat-box {
-            height: 260px;
-            overflow-y: auto;
-            background: #121212;
-            border-radius: 10px;
-            padding: 12px;
-            border: 1px solid #222;
-        }
+.card .meta {
+  font-size: 11px;
+  color: #aaa;
+}
 
-        .msg {
-            background: #1e1e1e;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
+.loader {
+  border: 3px solid #333;
+  border-top: 3px solid #00c853;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  top: 45%;
+  left: 45%;
+}
 
-        .msg strong {
-            color: #c7c7c7;
-        }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
-        .chat-input {
-            display: flex;
-            margin-top: 12px;
-            gap: 8px;
-        }
+#modal {
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: #121212;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+}
 
-        .chat-input input {
-            flex: 1;
-            padding: 12px;
-        }
+.close-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: #1f1f1f;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
 
-    </style>
+.modal-box {
+  padding: 15px;
+}
 
-    <!-- ===== FIREBASE ===== -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { 
-            getAuth, createUserWithEmailAndPassword, 
-            signInWithEmailAndPassword, signOut, onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+.modal-header {
+  display: flex;
+  gap: 12px;
+  margin-top: 40px;
+}
 
-        import { 
-            getDatabase, ref, push, onValue 
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+.modal-header img {
+  width: 70px;
+  height: 70px;
+  border-radius: 15px;
+}
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyB5A-ySceXCFRQ7iSCnOA68nRJqYpK6DQc",
-            authDomain: "dayzozmbi-server.firebaseapp.com",
-            databaseURL: "https://dayzozmbi-server-default-rtdb.firebaseio.com",
-            projectId: "dayzozmbi-server",
-            storageBucket: "dayzozmbi-server.firebasestorage.app"
-        };
+.modal-title {
+  font-size: 18px;
+}
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+.modal-meta {
+  font-size: 13px;
+  color: #aaa;
+}
 
-        const loginCard = document.getElementById("loginCard");
-        const profileCard = document.getElementById("profileCard");
-        const chatBox = document.getElementById("chatBox");
+.download-btn {
+  background: #00c853;
+  border: none;
+  padding: 14px;
+  width: 100%;
+  border-radius: 25px;
+  margin-top: 15px;
+}
 
-        let playerName = "";
+.gallery {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-top: 15px;
+}
 
-        // AUTO LOGIN
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                loginCard.style.display = "none";
-                profileCard.style.display = "block";
-                document.getElementById("profileEmail").value = user.email;
-            } else {
-                loginCard.style.display = "block";
-                profileCard.style.display = "none";
-            }
-        });
-
-        // LOGIN
-        window.Login = () => {
-            signInWithEmailAndPassword(auth,
-                document.getElementById("email").value,
-                document.getElementById("senha").value
-            ).catch(e => alert(e.message));
-        };
-
-        // CADASTRAR
-        window.Cadastrar = () => {
-            createUserWithEmailAndPassword(auth,
-                document.getElementById("email").value,
-                document.getElementById("senha").value
-            ).catch(e => alert(e.message));
-        };
-
-        // LOGOUT
-        window.Logout = () => signOut(auth);
-
-        // ENTRAR NO CHAT
-        window.EntrarChat = () => {
-            playerName = document.getElementById("profileName").value.trim();
-            if (playerName.length < 2) return alert("Nome muito curto.");
-            document.getElementById("chatSection").style.display = "block";
-        };
-
-        // ENVIAR MENSAGEM
-        window.EnviarMensagem = () => {
-            let msg = document.getElementById("chatText").value.trim();
-            if (!msg) return;
-            push(ref(db, "globalChat"), { nome: playerName, msg });
-            document.getElementById("chatText").value = "";
-        };
-
-        // RECEBER MENSAGENS
-        onValue(ref(db, "globalChat"), (snap) => {
-            chatBox.innerHTML = "";
-            snap.forEach(c => {
-                let d = c.val();
-                let div = document.createElement("div");
-                div.className = "msg";
-                div.innerHTML = `<strong>${d.nome}:</strong> ${d.msg}`;
-                chatBox.appendChild(div);
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-    </script>
-
+.gallery img {
+  height: 140px;
+  border-radius: 10px;
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
+<div class="header">ModSteam</div>
 
-        <!-- LOGIN -->
-        <div class="card" id="loginCard">
-            <h1>DayZombi</h1>
-            <h3>Entrar</h3>
+<!-- CATEGORIAS -->
+<div class="categorias" id="categorias">
+  <div class="cat-btn active" data-cat="Todos">Todos</div>
+  <div class="cat-btn" data-cat="Roupas">Roupas</div>
+  <div class="cat-btn" data-cat="Armas">Armas</div>
+  <div class="cat-btn" data-cat="Veiculos">Veiculos</div>
+  <div class="cat-btn" data-cat="Construções">Construções</div>
+  <div class="cat-btn" data-cat="Variados">Variados</div>
+</div>
 
-            <input id="email" type="email" placeholder="E-mail">
-            <input id="senha" type="password" placeholder="Senha">
+<div class="search">
+  <input type="text" id="busca" placeholder="Pesquisar mods...">
+</div>
 
-            <button onclick="Login()">Entrar</button>
-            <button onclick="Cadastrar()">Criar Conta</button>
-        </div>
+<div class="row" id="lista"></div>
 
-        <!-- PERFIL + CHAT -->
-        <div class="card" id="profileCard" style="display:none;">
-            <h2>Perfil</h2>
+<div id="modal">
+  <div id="modalContent"></div>
+</div>
 
-            <input id="profileName" type="text" placeholder="Seu nome no chat">
-            <input id="profileEmail" type="email" disabled>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-            <button onclick="EntrarChat()">Entrar no Chat</button>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5A-ySceXCFRQ7iSCnOA68nRJqYpK6DQc",
+  authDomain: "dayzozmbi-server.firebaseapp.com",
+  databaseURL: "https://dayzozmbi-server-default-rtdb.firebaseio.com",
+  projectId: "dayzozmbi-server",
+  storageBucket: "dayzozmbi-server.firebasestorage.app"
+};
 
-            <!-- CHAT -->
-            <div id="chatSection">
-                <h3>Chat Global</h3>
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-                <div id="chatBox" class="chat-box"></div>
+const lista = document.getElementById("lista");
+const busca = document.getElementById("busca");
+const categorias = document.querySelectorAll(".cat-btn");
 
-                <div class="chat-input">
-                    <input id="chatText" type="text" placeholder="Mensagem...">
-                    <button onclick="EnviarMensagem()">OK</button>
-                </div>
+let todosMods = [];
+let categoriaAtual = "Todos";
+
+function formatarData(t) {
+  return t ? new Date(t).toLocaleDateString("pt-BR") : "Sem data";
+}
+
+function registrarDownload(index) {
+  const mod = todosMods[index];
+  const newCount = (mod.downloads || 0) + 1;
+
+  update(ref(db, "mods/" + mod._key), {
+    downloads: newCount
+  });
+
+  window.location.href = mod.zipURL;
+}
+window.registrarDownload = registrarDownload;
+
+function render() {
+  const termo = busca.value.toLowerCase();
+  lista.innerHTML = "";
+
+  todosMods
+    .filter(m => {
+      const matchNome = (m.nome || "").toLowerCase().includes(termo);
+      const matchCat = categoriaAtual === "Todos" || m.categoria === categoriaAtual;
+      return matchNome && matchCat;
+    })
+    .forEach((m,i) => lista.appendChild(criarCard(m,i)));
+}
+
+function criarCard(data, index) {
+  const div = document.createElement("div");
+  div.className = "card";
+
+  div.innerHTML = `
+    <div style="position:relative;">
+      <div class="loader"></div>
+      <img src="${data.iconURL}" onload="this.previousElementSibling.style.display='none'">
+    </div>
+
+    <div class="info">
+      <div class="title">${data.nome}</div>
+
+      <div class="meta">
+        ${data.tamanho || "N/A"} • ${formatarData(data.data)} • ${data.downloads || 0} downloads
+      </div>
+
+      <div class="meta">
+        ${data.versao || "Sem versão"} • ${data.categoria || "Sem categoria"}
+      </div>
+    </div>
+  `;
+
+  div.onclick = () => {
+    document.getElementById("modal").style.display = "block";
+
+    document.getElementById("modalContent").innerHTML = `
+      <div class="close-btn" onclick="fechar()">✖</div>
+
+      <div class="modal-box">
+        <div class="modal-header">
+          <img src="${data.iconURL}">
+          <div>
+            <div class="modal-title">${data.nome}</div>
+
+            <div class="modal-meta">
+              ${data.tamanho || "N/A"} • ${formatarData(data.data)} • ${data.downloads || 0} downloads
             </div>
 
-            <button class="logout" onclick="Logout()">Sair</button>
+            <div class="modal-meta">
+              Versão: ${data.versao || "N/A"}<br>
+              Categoria: ${data.categoria || "N/A"}
+            </div>
+          </div>
         </div>
 
-    </div>
+        <button class="download-btn" onclick="registrarDownload(${index})">
+          ⬇ Baixar
+        </button>
+
+        <p>${data.descricao}</p>
+
+        <div class="gallery">
+          ${(data.imagens || []).map(img => `
+            <div style="position:relative;">
+              <div class="loader"></div>
+              <img src="${img}" onload="this.previousElementSibling.style.display='none'">
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  };
+
+  return div;
+}
+
+function fechar() {
+  document.getElementById("modal").style.display = "none";
+}
+window.fechar = fechar;
+
+categorias.forEach(btn => {
+  btn.onclick = () => {
+    document.querySelector(".active").classList.remove("active");
+    btn.classList.add("active");
+    categoriaAtual = btn.dataset.cat;
+    render();
+  };
+});
+
+busca.addEventListener("input", render);
+
+onValue(ref(db, "mods"), snap => {
+  todosMods = [];
+
+  snap.forEach(i => {
+    const val = i.val();
+    val._key = i.key;
+    todosMods.push(val);
+  });
+
+  todosMods.sort((a,b)=>(b.data||0)-(a.data||0));
+  render();
+});
+</script>
 
 </body>
 </html>
